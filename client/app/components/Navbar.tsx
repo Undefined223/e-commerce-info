@@ -17,11 +17,27 @@ interface Category {
     name: string;
 }
 interface UserPic {
-    data: string;
+    data: string;        // Path to the uploaded image
+    contentType: string; // MIME type of the image
 }
 
+
 interface User {
-    pic: UserPic;
+    _id: string;
+    name: string;
+    pic: {
+        data: string;
+    contentType: string; // MIME type of the image
+
+    };
+    email: string;
+    password: string;
+    isAdmin: boolean;
+    verified: boolean;
+    addresses: any[];    // Replace 'any' with the appropriate type if available
+    createdAt: string;   // You can use 'Date' if these are Date objects
+    updatedAt: string;
+    __v: number;
 }
 
 const Navbar: React.FC = () => {
@@ -206,7 +222,7 @@ const Navbar: React.FC = () => {
                         <>
                             <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
                                 <img
-                                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/${user.pic}`.replace(/\\/g, '/')}
+                                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/${user.pic.data}`.replace(/\\/g, '/')}
                                     width={32}
                                     height={32}
                                     className="m-2 w-8 h-8 rounded-full cursor-pointer"
@@ -341,7 +357,7 @@ const Navbar: React.FC = () => {
 
             {/* Modals */}
             <Modal isOpen={isSignupOpen} onClose={closeSignupModal}>
-                <SignupFormDemo/>
+                <SignupFormDemo />
             </Modal>
             <Modal isOpen={isLoginOpen} onClose={closeLoginModal}>
                 <LoginFormDemo />
