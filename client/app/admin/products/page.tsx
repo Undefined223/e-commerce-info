@@ -16,6 +16,7 @@ interface Product {
     name: string;
     price: number;
     category: string;
+    subCategory: string;
     brand: string;
     avatars: string[];
     availability: 'En stock' | 'On order' | 'Out of stock';
@@ -146,7 +147,7 @@ const Page: NextPage = () => {
                             <div key={product._id} className="bg-white rounded shadow p-4">
                                 <h2 className="text-lg font-bold mb-2">{product.name}</h2>
                                 <p className="text-gray-700 mb-2">{product.description}</p>
-                                <p className="text-slate-600 mb-1">Category: {product.category}</p>
+                                <p className="text-slate-600 mb-1">Category: {product.subCategory}</p>
                                 <p className="text-slate-600 mb-1">Brand: {product.brand}</p>
                                 <p className="text-slate-600 mb-1">Availability: {product.availability}</p>
                                 <p className="text-slate-600 mb-2">Colors: {product.colors.join(', ')}</p>

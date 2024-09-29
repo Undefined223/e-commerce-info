@@ -41,7 +41,7 @@ const Page: NextPage<Props> = () => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
-                const response = await axiosInstance.get<Product[]>(`/api/products/category/${id}`);
+                const response = await axiosInstance.get<Product[]>(`/api/products/subCategory/${id}`);
                 const productsData = response.data;
                 setProducts(productsData);
 
