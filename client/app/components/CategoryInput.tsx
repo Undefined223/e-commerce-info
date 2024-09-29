@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import axiosInstance from '@/app/components/AxiosInstance';
+import axiosInstance from './AxiosInstance';
 
 interface Category {
     _id: string;
@@ -8,30 +8,31 @@ interface Category {
 
 interface CategoryInputProps {
     value: string;
-    onInputChange: (value: string) => void;
+    onInputChange: (id: string, name: string) => void;
 }
 
 const CategoryInput: React.FC<CategoryInputProps> = ({ value, onInputChange }) => {
+    const [inputValue, setInputValue] = useState('');
     const [suggestions, setSuggestions] = useState<Category[]>([]);
     const [isFocused, setIsFocused] = useState<boolean>(false);
     const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if (value.length > 2) {
-            const fetchCategories = async () => {
+        const fetchCategories = async () => {
+            if (inputValue.length > 2) {
                 try {
-                    const response = await axiosInstance.get(`/api/categories/name/${value}`);
+                    const response = await axiosInstance.get(`/api/subCategories/name/${inputValue}`);
                     setSuggestions(response.data);
                 } catch (error) {
                     console.error('Failed to fetch categories:', error);
                 }
-            };
+            } else {
+                setSuggestions([]);
+            }
+        };
 
-            fetchCategories();
-        } else {
-            setSuggestions([]);
-        }
-    }, [value]);
+        fetchCategories();
+    }, [inputValue]);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -48,14 +49,16 @@ const CategoryInput: React.FC<CategoryInputProps> = ({ value, onInputChange }) =
     }, []);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        onInputChange(e.target.value);
+        setInputValue(e.target.value);
+        onInputChange('', e.target.value); // Clear ID, update name
         setIsFocused(true);
     };
 
     const handleSuggestionClick = (category: Category) => {
-        onInputChange(category.name);
-        setSuggestions([]); // Clear suggestions
-        setIsFocused(false); // Optionally, lose focus
+        setInputValue(category.name);
+        onInputChange(category._id, category.name);
+        setSuggestions([]);
+        setIsFocused(false);
     };
 
     const handleFocus = () => {
@@ -74,25 +77,24 @@ const CategoryInput: React.FC<CategoryInputProps> = ({ value, onInputChange }) =
         <div ref={containerRef} className="relative">
             <input
                 type="text"
-                value={value}
+                value={inputValue}
                 onChange={handleInputChange}
                 onFocus={handleFocus}
                 onBlur={handleBlur}
-                placeholder="Enter category name"
                 className="w-full border rounded py-2 px-3 text-black"
             />
-            {isFocused && suggestions.length > 0 && (
-                <ul className="absolute z-10 mt-1 w-full border border-gray-300 bg-white rounded shadow-lg text-black">
+            {suggestions.length > 0 && (
+                <div className="absolute left-0 right-0 bg-white border text-black border-slate-300 mt-1 rounded">
                     {suggestions.map((category) => (
-                        <li
+                        <div
                             key={category._id}
-                            onMouseDown={() => handleSuggestionClick(category)} // Use onMouseDown to handle clicks
-                            className="px-4 py-2 cursor-pointer hover:bg-gray-200"
+                            onClick={() => handleSuggestionClick(category)}
+                            className="cursor-pointer hover:bg-gray-200 px-2 py-1"
                         >
                             {category.name}
-                        </li>
+                        </div>
                     ))}
-                </ul>
+                </div>
             )}
         </div>
     );

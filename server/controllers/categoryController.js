@@ -1,6 +1,39 @@
-const Category = require('../models/categoryModel')
+const Category = require('../models/categoryModel');
+const SubCategory = require('../models/subCategoryModel');
 
 module.exports = {
+    addSubCategoryToCategory: async (req, res) => {
+        try {
+            const { categoryId, subCategoryName } = req.body;
+            const category = await Category.findById(categoryId);
+            if (!category) return res.status(404).json({ message: 'Category not found' });
+
+            const newSubCategory = await SubCategory.create({ name: subCategoryName, category: categoryId });
+            category.subCategory.push(newSubCategory._id);
+            await category.save();
+
+            res.json({ message: 'Subcategory added successfully', category });
+        } catch (err) {
+            res.status(500).json({ message: 'Error adding subcategory', err });
+        }
+    },
+
+    // Remove Subcategory from Category
+    removeSubCategoryFromCategory: async (req, res) => {
+        try {
+            const { categoryId, subCategoryId } = req.body;
+            const category = await Category.findById(categoryId);
+            if (!category) return res.status(404).json({ message: 'Category not found' });
+
+            category.subCategory = category.subCategory.filter(subCatId => subCatId.toString() !== subCategoryId);
+            await category.save();
+
+            res.json({ message: 'Subcategory removed successfully', category });
+        } catch (err) {
+            res.status(500).json({ message: 'Error removing subcategory', err });
+        }
+    },
+
     createCategory: (req, res) => {
         console.log('create Category triggered');
         Category.create(req.body)
@@ -13,15 +46,13 @@ module.exports = {
                 res.status(500).json({ error: 'Internal Server Error' });
             });
     },
-    getCategorys: (req, res) => {
-        Category.find({})
-            .then((allCategorys) => {
-                res.json(allCategorys);
-            })
-            .catch((err) => {
-                console.error(err);
-                res.status(500).json({ error: 'Internal Server Error' });
-            });
+    getCategorys: async(req, res) => {
+        try {
+            const categories = await Category.find().populate('subCategory');
+            res.json(categories);
+        } catch (err) {
+            res.status(500).json({ message: 'Error fetching categories with subcategories', err });
+        }
     },
     getOneCategory: (req, res) => {
         console.log('Fetching category with ID:', req.params.id); // Log the ID

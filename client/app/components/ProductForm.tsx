@@ -2,14 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axiosInstance from '@/app/components/AxiosInstance';
 import CategoryInput from './CategoryInput';
 import { FaImage, FaTimes } from 'react-icons/fa';
-import Modal from 'react-modal'; // Ensure you have imported or set up Modal correctly
-
-interface ProductFormProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onSubmit: (formData: FormData) => void;
-    initialData?: Product;
-}
+import Modal from 'react-modal';
 
 interface Product {
     _id?: string;
@@ -21,6 +14,26 @@ interface Product {
     availability: 'En stock' | 'On order' | 'Out of stock';
     description: string;
     colors: string[];
+}
+
+interface ProductFormData {
+    _id?: string;
+    name: string;
+    price: number;
+    categoryId: string;
+    categoryName: string;
+    brand: string;
+    avatars: (string | File)[];
+    availability: 'En stock' | 'On order' | 'Out of stock';
+    description: string;
+    colors: string[];
+}
+
+interface ProductFormProps {
+    isOpen: boolean;
+    onClose: () => void;
+    onSubmit: (formData: globalThis.FormData) => Promise<void>;
+    initialData?: Product;
 }
 
 const customStyles = {
@@ -49,12 +62,13 @@ const customStyles = {
 
 const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, initialData }) => {
     const [newColor, setNewColor] = useState<string>('');
-    const [formData, setFormData] = useState<Product>({
+    const [formData, setFormData] = useState<ProductFormData>({
         name: '',
         price: 0,
-        category: '',
+        categoryId: '',
+        categoryName: '',
         brand: '',
-        avatars: [] as (string | File)[],
+        avatars: [],
         availability: 'En stock',
         description: '',
         colors: [],
@@ -64,18 +78,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
         if (initialData) {
             setFormData({
                 ...initialData,
+                categoryId: initialData.category,
+                categoryName: initialData.category,
                 avatars: initialData.avatars || [],
-            });
-        } else {
-            setFormData({
-                name: '',
-                price: 0,
-                category: '',
-                brand: '',
-                avatars: [],
-                availability: 'En stock',
-                description: '',
-                colors: [],
             });
         }
     }, [initialData]);
@@ -108,10 +113,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
     const handleAvatarsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = e.target.files;
         if (files) {
+            const newAvatars = [...formData.avatars, ...Array.from(files)];
             setFormData((prevData) => ({
                 ...prevData,
-                avatars: [...prevData.avatars, ...Array.from(files)],
+                avatars: newAvatars,
             }));
+            console.log('Selected files:', files); // Debugging statement
         }
     };
 
@@ -125,23 +132,40 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
     const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const formDataToSend = new FormData();
+        const formDataToSend = new globalThis.FormData();
         formDataToSend.append('name', formData.name);
         formDataToSend.append('price', String(formData.price));
-        formDataToSend.append('category', formData.category);
+        formDataToSend.append('subCategory', formData.categoryId);
         formDataToSend.append('brand', formData.brand);
         formDataToSend.append('availability', formData.availability);
         formDataToSend.append('description', formData.description);
         formData.colors.forEach((color) => {
-            formDataToSend.append('colors', color);
+            formDataToSend.append('colors[]', color);
         });
 
-        const existingAvatars = formData.avatars.filter(avatar => typeof avatar === 'string').join(',');
-        formDataToSend.append('existingAvatars', existingAvatars);
+        // Handle existing avatars
+        const existingAvatars = formData.avatars.filter(avatar => typeof avatar === 'string');
+        formDataToSend.append('existingAvatars', JSON.stringify(existingAvatars));
+
+        // Handle new avatar files
+        const newAvatars = formData.avatars.filter(avatar => avatar instanceof File);
+        newAvatars.forEach((avatar) => {
+            formDataToSend.append('avatars', avatar as File);
+        });
 
         formData.avatars.filter(avatar => avatar instanceof File).forEach((avatar) => {
             formDataToSend.append('avatars', avatar);
         });
+        
+        // If it's an edit operation, include the _id
+        if (formData._id) {
+            formDataToSend.append('_id', formData._id);
+        }
+
+        // Debugging statement to verify FormData content
+        for (let pair of formDataToSend.entries()) {
+            console.log(pair[0] + ', ' + pair[1]);
+        }
 
         onSubmit(formDataToSend);
         onClose();
@@ -177,8 +201,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                     <div className="mb-4">
                         <label className="block mb-2 text-black">Category:</label>
                         <CategoryInput
-                            value={formData.category}
-                            onInputChange={(category) => setFormData(prevData => ({ ...prevData, category }))}
+                            value={formData.categoryName}
+                            onInputChange={(id, name) => setFormData(prevData => ({
+                                ...prevData,
+                                categoryId: id,
+                                categoryName: name
+                            }))}
                         />
                     </div>
                     <div className="mb-4">
@@ -243,9 +271,9 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                         <label className="block mb-2 text-black">Avatars:</label>
                         <input
                             type="file"
-                            onChange={handleAvatarsChange}
                             multiple
-                            className="text-black"
+                            onChange={handleAvatarsChange}
+                            className="border rounded py-2 px-3 text-black"
                         />
                         <div className="flex flex-wrap mt-2">
                             {formData.avatars.map((avatar, index) => (
@@ -283,12 +311,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ isOpen, onClose, onSubmit, in
                             ))}
                         </div>
                     </div>
-                    <button
-                        type="submit"
-                        className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-                    >
-                        {initialData ? 'Update Product' : 'Add Product'}
-                    </button>
+                    <div className="flex justify-end">
+                        <button type="button" onClick={onClose} className="mr-2 bg-gray-300 hover:bg-gray-400 text-black py-2 px-4 rounded">
+                            Cancel
+                        </button>
+                        <button type="submit" className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded">
+                            {initialData ? 'Update Product' : 'Add Product'}
+                        </button>
+                    </div>
                 </form>
             </div>
         </Modal>

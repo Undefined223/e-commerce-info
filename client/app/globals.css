@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Good Timing W00 Regular";
+  src: url("https://db.onlinewebfonts.com/t/c108d9f65bbf96412a067336eb5934d3.eot");
+  src: url("https://db.onlinewebfonts.com/t/c108d9f65bbf96412a067336eb5934d3.eot?#iefix") format("embedded-opentype"),
+    url("https://db.onlinewebfonts.com/t/c108d9f65bbf96412a067336eb5934d3.woff2") format("woff2"),
+    url("https://db.onlinewebfonts.com/t/c108d9f65bbf96412a067336eb5934d3.woff") format("woff"),
+    url("https://db.onlinewebfonts.com/t/c108d9f65bbf96412a067336eb5934d3.ttf") format("truetype"),
+    url("https://db.onlinewebfonts.com/t/c108d9f65bbf96412a067336eb5934d3.svg#Good Timing W00 Regular") format("svg");
+}
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;

@@ -5,6 +5,8 @@ const app = express();
 const path = require('path');
 const ProductRoutes = require('./routes/productRoute')
 const CategoryRoutes = require('./routes/categoryRoute')
+const SubCategoryRoutes = require('./routes/SubCategoryRoute')
+
 const UserRoutes = require('./routes/userRoutes');
 const OrderRoutes = require('./routes/OrderRoute');
 const VisitorRoutes = require('./routes/visitorRoutes');
@@ -41,6 +43,8 @@ app.use(express.json());
 
 app.use('/api/products', ProductRoutes);
 app.use('/api/categories', CategoryRoutes);
+app.use('/api/subCategories', SubCategoryRoutes);
+
 app.use('/api/user', UserRoutes);
 app.use('/api/orders', OrderRoutes);
 app.use('/api/', VisitorRoutes);

@@ -11,33 +11,25 @@ import Modal from "./ui/modal";
 import { LoginFormDemo } from "./ui/LoginForm";
 import UserContext from "../context/InfoPlusProvider";
 import { SignupFormDemo } from "./ui/SignUpForm";
+import { ToastContainer } from "react-toastify";
 
 interface Category {
     _id: string;
     name: string;
-}
-interface UserPic {
-    data: string;        // Path to the uploaded image
-    contentType: string; // MIME type of the image
+    subCategory: SubCategory[];
 }
 
-
-interface User {
+interface SubCategory {
     _id: string;
     name: string;
-    pic: {
-        data: string;
-    contentType: string; // MIME type of the image
+}
 
-    };
-    email: string;
-    password: string;
-    isAdmin: boolean;
-    verified: boolean;
-    addresses: any[];    // Replace 'any' with the appropriate type if available
-    createdAt: string;   // You can use 'Date' if these are Date objects
-    updatedAt: string;
-    __v: number;
+interface UserPic {
+    data: string;
+}
+
+interface User {
+    pic: UserPic;
 }
 
 const Navbar: React.FC = () => {
@@ -52,6 +44,16 @@ const Navbar: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [isSearchActive, setIsSearchActive] = useState(false);
+
+    const [openCategories, setOpenCategories] = useState<Record<number, boolean>>({});
+
+    // Toggle the visibility of subcategories
+    const toggleSubcategories = (index: number) => {
+        setOpenCategories((prevState) => ({
+            ...prevState,
+            [index]: !prevState[index],
+        }));
+    };
 
     const profileMenuRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
@@ -88,6 +90,7 @@ const Navbar: React.FC = () => {
             try {
                 const { data } = await axiosInstance.get<Category[]>("/api/categories");
                 setCategories(data);
+                console.log("cat", data)
             } catch (err) {
                 console.log(err);
             }
@@ -172,6 +175,7 @@ const Navbar: React.FC = () => {
             initial="hidden"
             animate="visible"
         >
+            <ToastContainer />
             <div className="flex flex-wrap items-center justify-around mx-auto max-w-screen-xl p-4">
                 <motion.div variants={logoVariants}>
                     <Link href="/" className="flex items-center justify-center space-x-3 w-full m-2 md:w-auto">
@@ -222,7 +226,7 @@ const Navbar: React.FC = () => {
                         <>
                             <motion.div whileHover={{ scale: 1.2 }} whileTap={{ scale: 0.9 }}>
                                 <img
-                                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/${user.pic.data}`.replace(/\\/g, '/')}
+                                    src={`${process.env.NEXT_PUBLIC_API_BASE_URL}/${user.pic}`.replace(/\\/g, '/')}
                                     width={32}
                                     height={32}
                                     className="m-2 w-8 h-8 rounded-full cursor-pointer"
@@ -324,33 +328,58 @@ const Navbar: React.FC = () => {
                         </div>
 
                         <AnimatePresence>
-                            {(dropdownOpen || window.innerWidth > 640) && (
-                                <motion.ul
-                                    className="sm:flex flex-wrap justify-center items-center text-center font-medium mt-2 sm:mt-0 space-y-2 sm:space-y-0 sm:space-x-8 rtl:space-x-reverse text-sm w-full sm:w-auto"
-                                    initial={{ opacity: 0, height: 0 }}
-                                    animate={{ opacity: 1, height: "auto" }}
-                                    exit={{ opacity: 0, height: 0 }}
-                                    transition={{ duration: 0.3 }}
-                                >
-                                    {categories.map((category, index) => (
-                                        <motion.li
-                                            key={category._id}
-                                            className="w-full sm:w-auto"
-                                            initial={{ opacity: 0, y: -20 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            transition={{ delay: index * 0.1 }}
-                                        >
-                                            <Link
-                                                href={`/category/${category._id}`}
-                                                className="block py-2 px-3 text-slate-200 hover:bg-gray-100 hover:text-yellow   sm:hover:bg-transparent sm:hover: rounded-md sm:bg-transparent duration-500"
-                                            >
-                                                {category.name}
-                                            </Link>
-                                        </motion.li>
-                                    ))}
-                                </motion.ul>
-                            )}
-                        </AnimatePresence>
+  {(dropdownOpen || window.innerWidth > 640) && (
+    <motion.ul
+      className="sm:flex flex-wrap justify-center items-center text-center font-medium mt-2 sm:mt-0 space-y-2 sm:space-y-0 sm:space-x-8 rtl:space-x-reverse w-full sm:w-auto font-good-timing text-sm"
+      initial={{ opacity: 0, height: 0 }}
+      animate={{ opacity: 1, height: '100%' }}
+      exit={{ opacity: 0, height: 0 }}
+      transition={{ duration: 0.3 }}
+    >
+      <div className="flex flex-col items-start flex-wrap sm:flex-row sm:items-start justify-center w-full sm:w-auto mx-auto max-w-screen-xl p-4 space-y-6 sm:space-y-0 sm:space-x-6">
+        {categories?.map((category, index) => (
+          <div
+            key={index}
+            className="flex flex-col flex-wrap items-center w-full sm:w-auto bg-gray-100 dark:bg-boxdark rounded-lg shadow-lg p-4"
+          >
+            {/* Category title with toggle */}
+            <li
+              className="text-lg font-bold text-yellow dark:text-yellow border-b-2 border-yellow w-full text-center py-2 cursor-pointer transition-all duration-300 ease-in-out"
+              onClick={() => toggleSubcategories(index)}
+            >
+              {category.name}
+            </li>
+
+            {/* Subcategory dropdown */}
+            <AnimatePresence>
+              {openCategories[index] && (
+                <motion.ul
+                  className="flex flex-col items-start w-full mt-4 space-y-2"
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {category.subCategory?.map((subCat, subIndex) => (
+                    <Link
+                      href={`/category/${subCat?._id}`}
+                      key={subIndex}
+                      className="text-sm text-body dark:text-bodydark border-l-4 border-transparent hover:border-primary dark:hover:border-primary pl-3 py-1 hover:bg-gray-200 dark:hover:bg-strokedark rounded transition-all duration-300 ease-in-out w-full"
+                    >
+                      {subCat.name}
+                    </Link>
+                  ))}
+                </motion.ul>
+              )}
+            </AnimatePresence>
+          </div>
+        ))}
+      </div>
+    </motion.ul>
+  )}
+</AnimatePresence>
+
+
                     </div>
                 </div>
             </motion.div>

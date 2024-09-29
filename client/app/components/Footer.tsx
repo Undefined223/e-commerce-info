@@ -18,7 +18,7 @@ const Footer: NextPage<Props> = ({ }) => {
                                 <h2 className="mb-6 text-sm font-semibold uppercase text-white">Shop Details</h2>
                                 <ul className="text-slate-300 font-medium">
                                     <li className="mb-4">InfoPlus</li>
-                                    <li className="mb-4">Délégation, Grombalia 8032</li>
+                                    <li className="mb-4">Nabeul, Grombalia 8030</li>
                                     <li className="mb-4">Phone: <a href={`tel:+21658073203`} className="hover:underline">58073203</a></li>
                                     <li>Email: <a href={`mailto:infoplusgrb@gmail.com`} className="hover:underline">infoplusgrb@gmail.com</a></li>
                                 </ul>
@@ -38,10 +38,13 @@ const Footer: NextPage<Props> = ({ }) => {
                                 <h2 className="mb-6 text-sm font-semibold text-slate-50 uppercase">Legal</h2>
                                 <ul className="text-slate-300 font-medium">
                                     <li className="mb-4">
-                                        <a href="#" className="hover:underline">Privacy Policy</a>
+                                        <a href="conditions" className="hover:underline">Conditions d&apos;utilisation</a>
+                                    </li>
+                                    <li className='mb-4'>
+                                        <a href="livraison" className="hover:underline">Livraison</a>
                                     </li>
                                     <li>
-                                        <a href="#" className="hover:underline">Terms & Conditions</a>
+                                        <a href="payment" className="hover:underline">Paiement sécurisé</a>
                                     </li>
                                 </ul>
                             </div>

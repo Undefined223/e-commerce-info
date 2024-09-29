@@ -25,7 +25,7 @@ const SlideShow: NextPage<Props> = () => {
             try {
                 const { data } = await axiosInstance.get('/api/announcments/all');
                 console.log('ann', data);
-                const filteredData = data.filter((announcement: Announcement) => announcement.text !== "small");
+                const filteredData = data.filter((announcement: Announcement) => announcement.text !== "Small");
                 setAnnouncements(filteredData);
             } catch (err) {
                 console.log(err);

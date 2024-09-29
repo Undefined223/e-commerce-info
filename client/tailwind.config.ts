@@ -15,11 +15,12 @@ const config: Config = {
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  
+
   darkMode: "class",
   theme: {
     fontFamily: {
       satoshi: ["Satoshi", "sans-serif"],
+      'good-timing': ['"Good Timing W00 Regular"', 'sans-serif'],
     },
     screens: {
       "2xsm": "375px",
@@ -40,7 +41,7 @@ const config: Config = {
         bodydark: "#AEB7C0",
         bodydark1: "#DEE4EE",
         bodydark2: "#8A99AF",
-        
+
         primary: "#3C50E0",
         secondary: "#80CAEE",
         stroke: "#E2E8F0",

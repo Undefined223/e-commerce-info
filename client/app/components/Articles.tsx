@@ -33,7 +33,7 @@ const Articles: NextPage<Props> = () => {
         const getAnnouncements = async () => {
             try {
                 const { data } = await axiosInstance.get('/api/announcments/all');
-                const filteredData = data.filter((article: Article) => article.text.includes("small"));
+                const filteredData = data.filter((article: Article) => article.text.includes("Small"));
                 console.log('arr', filteredData);
                 setArticles(filteredData);
             } catch (err) {

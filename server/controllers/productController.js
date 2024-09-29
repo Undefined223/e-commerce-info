@@ -1,10 +1,13 @@
 const Product = require('../models/productModel');
 const Category = require('../models/categoryModel');
+const SubCategory = require('../models/subCategoryModel');
 
 module.exports = {
     createProduct: async (req, res) => {
+        console.log('Request Body:', req.body);
+        console.log(req.files)
         try {
-            const { name, price, category, brand, availability, description } = req.body;
+            const { name, price, category, brand, availability, description, subCategory } = req.body;
             const avatars = req.files.map(file => file.path);
             const colors = req.body.colors; // This will be an array if there are multiple colors
 
@@ -19,6 +22,7 @@ module.exports = {
                 brand,
                 avatars,
                 availability,
+                subCategory,
                 description,
                 colors: Array.isArray(colors) ? colors : [colors], // Ensure colors is always an array
             });
@@ -83,6 +87,30 @@ module.exports = {
             res.status(500).json({ error: 'Failed to delete product' });
         }
     },
+    getProductsBySubcategory: async (req, res, next) => {
+        try {
+            // Find the subcategory by its ID
+            const subcategory = await SubCategory.findById(req.params.id);
+    
+            if (!subcategory) {
+                return res.status(400).json({ message: "Failed to find the subcategory." });
+            }
+    
+            // Find products that match the subcategory's ObjectId
+            const products = await Product.find({ subCategory: subcategory._id });
+    
+            // If no products are found, return a 404 status
+            if (products.length === 0) {
+                return res.status(404).json({ message: "No products found for this subcategory." });
+            }
+    
+            // Return the filtered products
+            return res.status(200).json(products);
+        } catch (err) {
+            // Handle errors and pass to next middleware
+            next(err);
+        }
+    },
     getProductsSpecificCategory: async (req, res, next) => {
         try {
             const category = await Category.findById(req.params.id);
@@ -103,28 +131,28 @@ module.exports = {
         console.log(req.query)
         try {
             const { name } = req.query;
-    
+
             // Ensure that name exists and is not an empty string
             if (!name || name.trim() === "") {
                 return res.status(400).json({ message: "Search query cannot be empty" });
-            }   
-    
+            }
+
             // Use word boundaries or ensure that the search term is at the start of a word
             const searchQuery = {
                 name: { $regex: `\\b${name}`, $options: 'i' } // Word boundary or start of word, case-insensitive search
             };
-    
+
             const products = await Product.find(searchQuery);
-    
+
             if (!products || products.length === 0) {
                 return res.status(404).json({ message: 'No products found matching the criteria' });
             }
-    
+
             res.status(200).json(products);
         } catch (err) {
             console.error('Error searching products:', err);
             res.status(500).json({ message: 'Server error', err });
         }
     }
-    
+
 };

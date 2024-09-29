@@ -1,4 +1,4 @@
-const { createProduct, getProducts, getOneProduct, getOneProductandDelete, getProductsSpecificCategory, updateProduct, searchProducts } = require('../controllers/productController');
+const { createProduct, getProducts, getOneProduct, getOneProductandDelete, getProductsSpecificCategory, updateProduct, searchProducts, getProductsBySubcategory } = require('../controllers/productController');
 const express = require('express');
 const router = express.Router();
 const { upload } = require('../utils/storage');
@@ -14,6 +14,6 @@ router.get('/search', searchProducts);
 
 router.get('/:id', getOneProduct);
 router.delete('/:id', protect, admin, getOneProductandDelete);
-router.get('/category/:id', getProductsSpecificCategory);
-
+router.get('/category/:id', getProductsSpecificCategory); 
+router.get('/subcategory/:id', getProductsBySubcategory);
 module.exports = router;

@@ -1,8 +1,10 @@
-const { createCategory, getCategorys, getOneCategory, getOneCategoryandDelete, getCategoryByName, getOneCategoryandUpdate } = require('../controllers/categoryController')
+const { createCategory, getCategorys, getOneCategory, getOneCategoryandDelete, getCategoryByName, getOneCategoryandUpdate, addSubCategoryToCategory, removeSubCategoryFromCategory } = require('../controllers/categoryController')
 const express = require('express');
 const { protect, admin } = require('../middleware/AdminMiddleware');
 const router = express.Router();
 
+router.post('/addSubcategory', addSubCategoryToCategory);
+router.post('/removeSubcategory', removeSubCategoryFromCategory);
 router.get('/', getCategorys);
 router.get('/name/:name', getCategoryByName);
 router.get('/:id', getOneCategory);

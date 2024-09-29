@@ -4,9 +4,7 @@ interface User {
     _id: string; 
     name: string;
     email: string;
-    pic: {
-        data: string;
-    };
+    pic: string;
     isAdmin: boolean;
     verified: boolean;
     token: string
